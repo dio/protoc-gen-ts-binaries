@@ -1,0 +1,38 @@
+{
+  "name": "protoc-gen-ts-binaries",
+  "description": "",
+  "version": "1.0.0",
+  "author": {
+    "name": "Dhi Aurrahman",
+    "email": "dio@rockybars.com"
+  },
+  "bin": {
+    "protoc-gen-ts": "protoc-gen-ts/bin/protoc-gen-ts.js"
+  },
+  "license": "MIT",
+  "scripts": {
+    "archive": "node scripts/archive",
+    "dist": "node scripts/check",
+    "compile": "yarn --cwd protoc-gen-ts && pkg ."
+  },
+  "dependencies": {
+    "compare-versions": "^4.1.2",
+    "cross-zip": "^4.0.0",
+    "execa": "^6.0.0",
+    "fs-extra": "^10.0.0",
+    "pkg": "^5.5.1",
+    "simple-git": "^2.48.0",
+    "tar": "^6.1.11"
+  },
+  "pkg": {
+    "targets": [
+      "node16-linuxstatic-x64",
+      "node16-linuxstatic-arm64",
+      "node16-macos-x64",
+      "node16-macos-arm64",
+      "node16-win-x64",
+      "node16-win-arm64"
+    ],
+    "outputPath": "dist"
+  }
+}
