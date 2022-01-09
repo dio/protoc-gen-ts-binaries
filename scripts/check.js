@@ -37,9 +37,9 @@ const distDir = path.join(__dirname, "..", "dist");
       repo: "protoc-gen-ts-binaries",
       tag_name: tag.name,
       target_commitish: 'main',
-      name: tag.name,
+      name: `protoc-gen-ts ${tag.name}`,
       body: `
-Release ${tag.name}.
+Binaries of [protoc-gen-ts@${tag.name}](https://github.com/thesayyn/protoc-gen-ts/releases/tag/${tag.name}).
     `,
       draft: false
     });
