@@ -16,4 +16,5 @@ jobs:
         with:
           cache: yarn
           node-version: 16.x
-      - run: yarn check
+          cache-dependency-path: "**/yarn.lock"
+      - run: yarn dist
