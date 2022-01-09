@@ -1,6 +1,3 @@
-
-// To compile: yarn --cwd protoc-gen-ts && pkg .
-
 const path = require('path');
 
 const compareVersion = require('compare-versions');
@@ -18,16 +15,15 @@ const PROTOC_GEN_TS_DIR = path.join(__dirname, '..', PROTOC_GEN_TS);
     await git().clone(PROTOC_GEN_TS_REPO);
   }
   const remoteTags = await getTags(PROTOC_GEN_TS_DIR);
-  const currentTags = await getTags(__dirname);
-
-  // Check current tags, check protoc-gen-ts tags if missing, create a new tag, release, and upload
-  // artifacts.
-
-  for (const tag of remoteTags) {
+  const localTags = await getTags(__dirname);
+  const missingTags = getMissingTags(remoteTags, localTags);
+  for (const tag of missingTags) {
     await git(PROTOC_GEN_TS_DIR).checkout(tag.ref);
     await yarnRun(__dirname, 'compile'); // yarn --cwd protoc-gen-ts && pkg .
     await yarnRun(__dirname, 'archive');
   }
+
+  // TODO(dio): Create tags, release, and upload the artifacts.
 })();
 
 function parseTagPath(tagPath) {
@@ -53,4 +49,15 @@ async function getTags(dir) {
       ...parseTagPath(parts[1])
     };
   }).filter((tag) => compareVersion(tag.name, MIN_VERSION) >= 0);
+}
+
+function getMissingTags(remoteTags, localTags) {
+  if (localTags.length === 0) {
+    return remoteTags;
+  }
+  return remoteTags.filter((tag) => !includesTag(tag, localTags));
+}
+
+function includesTag(tag, tags) {
+  return tags.filter((item) => item.name === tag.name).length > 0;
 }
