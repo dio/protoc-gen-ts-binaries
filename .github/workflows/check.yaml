@@ -22,5 +22,14 @@ jobs:
           path: .cache
           key: release-${{ runner.os }}-dist-${{ hashFiles('yarn.lock') }}
           restore-keys: release-${{ runner.os }}-dist-
+      - uses: extractions/netrc@v1
+        with:
+          machine: github.com
+          username: dio
+          password: ${{ secrets.GITHUB_TOKEN }}
       - run: yarn
-      - run: PKG_CACHE_PATH=.cache yarn dist
+      - run: yarn dist
+        env:
+          PKG_CACHE_PATH: .cache
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
