@@ -1,5 +1,6 @@
 const path = require('path');
 
+const github = require('@actions/github');
 const compareVersion = require('compare-versions');
 const fs = require('fs-extra');
 const git = require('simple-git/promise');
@@ -8,6 +9,9 @@ const MIN_VERSION = '0.8.1';
 const PROTOC_GEN_TS = 'protoc-gen-ts';
 const PROTOC_GEN_TS_REPO = 'https://github.com/thesayyn/protoc-gen-ts.git';
 const PROTOC_GEN_TS_DIR = path.join(__dirname, '..', PROTOC_GEN_TS);
+
+const gh = github.getOctokit(process.env.GITHUB_TOKEN);
+const distDir = path.join(__dirname, "..", "dist");
 
 (async () => {
   const cloned = await fs.pathExists(PROTOC_GEN_TS_DIR);
@@ -21,9 +25,36 @@ const PROTOC_GEN_TS_DIR = path.join(__dirname, '..', PROTOC_GEN_TS);
     await git(PROTOC_GEN_TS_DIR).checkout(tag.ref);
     await yarnRun(__dirname, 'compile'); // yarn --cwd protoc-gen-ts && pkg .
     await yarnRun(__dirname, 'archive');
-  }
+    try {
+      await git(__dirname).addTag(tag.name);
+    } catch { }
 
-  // TODO(dio): Create tags, release, and upload the artifacts.
+    await git(__dirname).pushTags();
+
+    // TODO(dio): Create a release and upload the artifacts.
+    const { data: { id } } = await gh.rest.repos.createRelease({
+      owner: "dio",
+      repo: "protoc-gen-ts-binaries",
+      tag_name: tag.name,
+      target_commitish: 'main',
+      name: tag.name,
+      body: `
+Release ${tag.name}.
+    `,
+      draft: false
+    });
+
+    const files = await fs.readdir(distDir);
+    for (const file of files) {
+      await gh.rest.repos.uploadReleaseAsset({
+        owner: "dio",
+        repo: "protoc-gen-ts-binaries",
+        release_id: id,
+        name: file,
+        data: await fs.readFile(path.join(distDir, file))
+      });
+    }
+  }
 })();
 
 function parseTagPath(tagPath) {
