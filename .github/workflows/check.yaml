@@ -22,7 +22,7 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: .cache
-          key: release-${{ runner.os }}-dist-${{ hashFiles('yarn.lock') }}
+          key: release-${{ runner.os }}-dist-${{ hashFiles('yarn.lock', 'package.json') }}
           restore-keys: release-${{ runner.os }}-dist-
       - uses: extractions/netrc@v1
         with:
