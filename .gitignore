@@ -1,3 +1,4 @@
+.cache
 dist
 protoc-gen-ts
 node_modules
